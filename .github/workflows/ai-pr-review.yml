@@ -1,0 +1,16 @@
+name: AI PR Review
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+permissions:
+  contents: read
+  pull-requests: read
+  issues: write
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    steps:
+      - uses: vivekjne/ai-pr-review-agent@main
+        with:
+          opencode-api-key: ${{ secrets.OPENCODE_API_KEY }}
