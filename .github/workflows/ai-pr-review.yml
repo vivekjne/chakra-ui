@@ -1,17 +1,39 @@
+# AI PR Review — Automated code review via AI
+# ==============================================================================
+# Runs when:
+#   - A PR is opened, new commits are pushed, a PR is reopened, or a draft is
+#     marked "ready for review"
+#   - Manually triggered from the Actions tab (enter a PR number)
+#
+# Required secrets (Settings → Secrets and variables → Actions):
+#   OPENCODE_API_KEY    — Your OpenCode Go API key
+#   GITHUB_TOKEN        — Auto-provided, no setup needed
+# ==============================================================================
 name: AI PR Review
+
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to review (for existing PRs)"
+        required: false
+        type: number
+
 permissions:
   contents: read
   pull-requests: read
   issues: write
+
 jobs:
   review:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.draft == false
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+
     steps:
       - uses: vivekjne/ai-pr-review-agent@main
         with:
           opencode-api-key: ${{ secrets.OPENCODE_API_KEY }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          pr-number: ${{ inputs.pr_number || '' }}
